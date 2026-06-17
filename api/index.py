@@ -1,34 +1,27 @@
 """
 Vercel entry point for LevelUp Poker Lab.
+Frontend static files are in api/_static/ (built at deploy time).
 """
-import os
-import subprocess
-import sys
 from pathlib import Path
 
-# Build frontend at deploy time
-_ROOT = Path(__file__).resolve().parent.parent
-_DIST = _ROOT / "frontend" / "dist"
-if not _DIST.exists():
-    subprocess.run(["npm", "install"], cwd=str(_ROOT / "frontend"), check=True)
-    subprocess.run(["npm", "run", "build"], cwd=str(_ROOT / "frontend"), check=True)
+_STATIC_DIR = Path(__file__).parent / "_static"
 
-# Import FastAPI app (app/ is in the same directory as this file)
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.main import app
 
 # Mount static assets
-if (_DIST / "assets").exists():
-    app.mount("/assets", StaticFiles(directory=str(_DIST / "assets")), name="assets")
+_assets = _STATIC_DIR / "assets"
+if _assets.exists():
+    app.mount("/assets", StaticFiles(directory=str(_assets)), name="assets")
 
-# SPA fallback
+# SPA fallback for non-API routes
 @app.get("/{full_path:path}", include_in_schema=False)
 async def spa(full_path: str):
-    idx = _DIST / "index.html"
+    idx = _STATIC_DIR / "index.html"
     if idx.exists():
         return FileResponse(str(idx))
-    return {"detail": "Not found"}
+    return {"detail": "Frontend not built"}
 
 from mangum import Mangum
 handler = Mangum(app)
