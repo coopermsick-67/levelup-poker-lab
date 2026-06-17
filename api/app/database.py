@@ -26,7 +26,13 @@ class Base(DeclarativeBase):
     pass
 
 
+def _ensure_tables():
+    """Create tables if they don't exist. Safe to call multiple times."""
+    Base.metadata.create_all(bind=engine)
+
+
 def get_db():
+    _ensure_tables()
     db = SessionLocal()
     try:
         yield db

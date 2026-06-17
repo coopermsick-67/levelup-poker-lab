@@ -6,12 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from mangum import Mangum
 
-from app.database import engine, Base
+from app.database import engine, Base, _ensure_tables
 from app.api import auth, play, drills, review, gamification
 
 logger = logging.getLogger("uvicorn.error")
 
-Base.metadata.create_all(bind=engine)
+_ensure_tables()
 
 app = FastAPI(title="LevelUp Poker Lab", version="1.0.0")
 
