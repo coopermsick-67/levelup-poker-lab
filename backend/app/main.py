@@ -1,10 +1,7 @@
 import os
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from mangum import Mangum
 
 from app.database import engine, Base
@@ -37,20 +34,6 @@ app.include_router(gamification.router, prefix="/api/gamification", tags=["gamif
 @app.get("/api/health")
 def health():
     return {"status": "ok", "app": "LevelUp Poker Lab"}
-
-
-# Serve frontend static files
-_STATIC_DIR = Path(__file__).parent / "static"
-if _STATIC_DIR.exists():
-    app.mount("/assets", StaticFiles(directory=str(_STATIC_DIR / "assets")), name="assets")
-
-    @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str):
-        """Serve the SPA index.html for all non-API routes."""
-        index_file = _STATIC_DIR / "index.html"
-        if index_file.exists():
-            return FileResponse(str(index_file))
-        return {"detail": "Not Found"}
 
 
 # Mangum handler for Vercel / AWS Lambda
