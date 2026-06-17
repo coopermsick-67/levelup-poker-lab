@@ -23,13 +23,13 @@ DECISIONS_PATH = Path(__file__).resolve().parent.parent / "data" / "user_decisio
 
 def _load_decisions(user_id: int) -> list[dict[str, Any]]:
     """Load persisted decisions for a user from the JSON file."""
-    if not DECISIONS_PATH.exists():
-        return _load_from_game_manager(user_id)
     try:
-        data = json.loads(DECISIONS_PATH.read_text(encoding="utf-8"))
-        return data.get(str(user_id), [])
+        if DECISIONS_PATH.exists():
+            data = json.loads(DECISIONS_PATH.read_text(encoding="utf-8"))
+            return data.get(str(user_id), [])
     except (json.JSONDecodeError, OSError):
-        return _load_from_game_manager(user_id)
+        pass
+    return _load_from_game_manager(user_id)
 
 
 def _load_from_game_manager(user_id: int) -> list[dict[str, Any]]:
