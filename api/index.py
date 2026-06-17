@@ -2,7 +2,11 @@
 Vercel entry point for LevelUp Poker Lab.
 Frontend static files are in api/_static/ (built at deploy time).
 """
+import sys
 from pathlib import Path
+
+# Add api/ to sys.path so `import app` works
+sys.path.insert(0, str(Path(__file__).parent))
 
 _STATIC_DIR = Path(__file__).parent / "_static"
 
