@@ -5,6 +5,15 @@ import PlayLab from './pages/PlayLab/PlayLab'
 import DrillLab from './pages/DrillLab/DrillLab'
 import ReviewLab from './pages/ReviewLab/ReviewLab'
 import Profile from './pages/Profile/Profile'
+import { hasSession } from './api/auth'
+
+/** Redirect to onboarding if not logged in and not in guest mode. */
+function RequireAuth({ children }: { children: JSX.Element }) {
+  if (!hasSession()) {
+    return <Navigate to="/" replace />
+  }
+  return children
+}
 
 export default function App() {
   return (
@@ -12,10 +21,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Onboarding />} />
         <Route element={<Layout />}>
-          <Route path="/play" element={<PlayLab />} />
-          <Route path="/drills" element={<DrillLab />} />
-          <Route path="/review" element={<ReviewLab />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/play" element={<RequireAuth><PlayLab /></RequireAuth>} />
+          <Route path="/drills" element={<RequireAuth><DrillLab /></RequireAuth>} />
+          <Route path="/review" element={<RequireAuth><ReviewLab /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

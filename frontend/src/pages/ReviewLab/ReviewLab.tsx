@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { fetchSummary, fetchCoachReport } from '../../api/review'
 import type { PokerStats, Leak, ReviewSummary, CoachReportData, TrainingDrill } from '../../types/review'
+import { isGuest } from '../../api/auth'
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -236,6 +237,25 @@ export default function ReviewLab() {
   useEffect(() => {
     load()
   }, [load])
+
+  if (isGuest()) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-4">
+        <div className="text-4xl">📊</div>
+        <h2 className="text-2xl font-bold text-gold">Review Lab</h2>
+        <p className="text-gray-400 text-center max-w-sm">
+          You're playing as a guest. Create an account to save your hand history,
+          track stats, find leaks, and get AI coaching reports.
+        </p>
+        <button
+          onClick={() => { localStorage.removeItem('guest_mode'); window.location.href = '/'; }}
+          className="bg-gold text-gray-900 font-bold px-6 py-2 rounded-lg hover:bg-gold-dark transition-colors"
+        >
+          Create Account
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">

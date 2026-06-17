@@ -46,3 +46,28 @@ def get_current_user_id(
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user_id
+
+
+def get_optional_user_id(
+    authorization: Optional[str] = Header(None),
+    token: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+) -> int:
+    """Like get_current_user_id but returns -1 for unauthenticated (guest) users."""
+    raw_token = None
+    if authorization and authorization.startswith("Bearer "):
+        raw_token = authorization[7:]
+    elif token:
+        raw_token = token
+
+    if not raw_token:
+        return -1  # guest
+
+    try:
+        user_id = _decode_token(raw_token)
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return -1
+        return user_id
+    except HTTPException:
+        return -1

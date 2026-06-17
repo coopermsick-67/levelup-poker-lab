@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, login } from "../api/auth";
+import { register, login, enterGuestMode } from "../api/auth";
 
 type Mode = "welcome" | "register" | "login";
 
@@ -28,6 +28,7 @@ export default function Onboarding() {
       const result = await register(displayName.trim(), username.trim(), password);
       localStorage.setItem("access_token", result.access_token);
       localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.removeItem("guest_mode");
       navigate("/play");
     } catch (err: any) {
       setError(err.message || "Registration failed. Try a different username.");
@@ -47,12 +48,18 @@ export default function Onboarding() {
       const result = await login(username.trim(), password);
       localStorage.setItem("access_token", result.access_token);
       localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.removeItem("guest_mode");
       navigate("/play");
     } catch (err: any) {
       setError(err.message || "Login failed. Check your credentials.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGuest = () => {
+    enterGuestMode();
+    navigate("/play");
   };
 
   return (
@@ -76,6 +83,17 @@ export default function Onboarding() {
             className="bg-felt text-white font-medium px-8 py-3 rounded-lg hover:bg-felt-dark transition-colors"
           >
             Sign In
+          </button>
+          <div className="flex items-center gap-2 my-1">
+            <div className="flex-1 h-px bg-gray-700" />
+            <span className="text-xs text-gray-500">or</span>
+            <div className="flex-1 h-px bg-gray-700" />
+          </div>
+          <button
+            onClick={handleGuest}
+            className="bg-gray-700 text-gray-200 font-medium px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors border border-gray-600"
+          >
+            Play as Guest
           </button>
         </div>
       )}

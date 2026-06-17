@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user_id
+from app.api.deps import get_optional_user_id
 from app.database import get_db
 from app.models.user import User
 from app.services.poker_engine.game_manager import game_manager
@@ -12,18 +12,22 @@ router = APIRouter()
 
 @router.post("/tables")
 def create_table(
-    user_id: int = Depends(get_current_user_id),
+    user_id: int = Depends(get_optional_user_id),
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).filter(User.id == user_id).first()
-    table = game_manager.create_table(user_id, user.display_name)
+    display_name = "Guest"
+    if user_id > 0:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            display_name = user.display_name
+    table = game_manager.create_table(user_id, display_name)
     return {"table_id": table.table_id, "table": table.to_dict(user_id)}
 
 
 @router.post("/tables/{table_id}/start")
 def start_hand(
     table_id: str,
-    user_id: int = Depends(get_current_user_id),
+    user_id: int = Depends(get_optional_user_id),
 ):
     if table_id not in game_manager.tables:
         raise HTTPException(status_code=404, detail="Table not found")
@@ -38,7 +42,7 @@ def start_hand(
 def action(
     table_id: str,
     req: ActionRequest,
-    user_id: int = Depends(get_current_user_id),
+    user_id: int = Depends(get_optional_user_id),
 ):
     result = game_manager.apply_hero_action(table_id, user_id, req.action_type, req.amount)
     if "error" in result:
@@ -49,7 +53,7 @@ def action(
 @router.get("/tables/{table_id}")
 def get_table(
     table_id: str,
-    user_id: int = Depends(get_current_user_id),
+    user_id: int = Depends(get_optional_user_id),
 ):
     if table_id not in game_manager.tables:
         raise HTTPException(status_code=404, detail="Table not found")

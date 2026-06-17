@@ -9,7 +9,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user_id
+from app.api.deps import get_current_user_id, get_optional_user_id
 from app.database import get_db
 from app.services.analytics.stats import compute_stats
 from app.services.analytics.leaks import find_leaks

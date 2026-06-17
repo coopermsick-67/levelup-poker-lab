@@ -10,6 +10,7 @@ import type {
   Quest,
   LeaderboardEntry,
 } from "../../types/gamification";
+import { isGuest } from "../../api/auth";
 import QuestTracker from "./QuestTracker";
 import BadgeCollection from "./BadgeCollection";
 import Leaderboard from "./Leaderboard";
@@ -124,14 +125,21 @@ export default function Profile() {
     }
   };
 
-  if (typeof window !== 'undefined' && !localStorage.getItem('access_token')) {
+  if (isGuest()) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-4">
         <div className="text-4xl">🃏</div>
         <h2 className="text-2xl font-bold text-gold">Profile</h2>
-        <p className="text-gray-400 text-center">
-          Please sign in or create an account to view your profile.
+        <p className="text-gray-400 text-center max-w-sm">
+          You're playing as a guest. Create an account to save your progress,
+          earn XP, unlock badges, and track your improvement over time.
         </p>
+        <button
+          onClick={() => { localStorage.removeItem('guest_mode'); window.location.href = '/'; }}
+          className="bg-gold text-gray-900 font-bold px-6 py-2 rounded-lg hover:bg-gold-dark transition-colors"
+        >
+          Create Account
+        </button>
       </div>
     );
   }
